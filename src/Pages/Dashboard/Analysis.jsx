@@ -10,7 +10,7 @@ import {
   Slider,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   BarChart,
   Bar,
@@ -41,6 +41,13 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   flexDirection: "column",
   padding: theme.spacing(4),
   backgroundColor: "#ffffff",
+  marginLeft: "60px",
+  overflow: "hidden",
+  "&::-webkit-scrollbar": {
+    display: "none",
+  },
+  "-ms-overflow-style": "none",
+  "scrollbar-width": "none",
 }));
 
 const ChartPaper = styled(Paper)(({ theme }) => ({
@@ -54,8 +61,7 @@ const Analysis = () => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState([0, 100]);
-  const { search } = useLocation();
-  const videoName = new URLSearchParams(search).get("video_name");
+  const videoName = useSelector((state) => state.video.videoName);
 
   // Detect mobile screens
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
@@ -69,14 +75,13 @@ const Analysis = () => {
         setResults(response.data.engagement_results);
       } catch (error) {
         console.error("Error fetching analysis results:", error);
+        setResults(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (videoName) {
-      fetchAnalysisResults();
-    }
+    fetchAnalysisResults();
   }, [videoName]);
 
   const prepareChartData = () => {
@@ -173,6 +178,7 @@ const Analysis = () => {
         variant="h4"
         gutterBottom
         sx={{ fontSize: { xs: "1.5rem", sm: "2rem" }, mb: 4 }}
+        align="center"
       >
         Advanced Engagement Analysis for{" "}
         <span style={{ color: "#1976d2" }}>{videoName}</span>
@@ -180,6 +186,7 @@ const Analysis = () => {
 
       {results ? (
         <Grid container spacing={4}>
+          {/* Engagement Overview */}
           <Grid item xs={12} md={6}>
             <ChartPaper>
               <Typography variant="h5" gutterBottom>
@@ -211,6 +218,7 @@ const Analysis = () => {
             </ChartPaper>
           </Grid>
 
+          {/* Engagement Distribution */}
           <Grid item xs={12} md={6}>
             <ChartPaper>
               <Typography variant="h5" gutterBottom>
@@ -244,6 +252,7 @@ const Analysis = () => {
             </ChartPaper>
           </Grid>
 
+          {/* Engagement Timeline */}
           <Grid item xs={12}>
             <ChartPaper>
               <Typography variant="h5" gutterBottom>
@@ -274,6 +283,7 @@ const Analysis = () => {
             </ChartPaper>
           </Grid>
 
+          {/* Engagement Heatmap */}
           <Grid item xs={12}>
             <ChartPaper>
               <Typography variant="h5" gutterBottom>
@@ -337,6 +347,7 @@ const Analysis = () => {
             </ChartPaper>
           </Grid>
 
+          {/* Engagement Scatter Plot */}
           <Grid item xs={12}>
             <ChartPaper>
               <Typography variant="h5" gutterBottom>

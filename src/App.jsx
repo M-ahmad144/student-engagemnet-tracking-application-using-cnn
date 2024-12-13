@@ -1,38 +1,18 @@
-import React from "react";
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { Outlet } from "react-router-dom";
+import Navigation from "./Pages/Auth/Navigation";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Home from "./Pages/HomePage";
-import Analysis from "./Pages/Analysis";
-
-// Optional: Create your MUI theme if needed
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#2980B9",
-    },
-    secondary: {
-      main: "#F39C12",
-    },
-    background: {
-      default: "#1D1F2E",
-    },
-  },
-});
-
-const App = () => {
+export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/analysis-result" element={<Analysis />} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <>
+      <ToastContainer />
+      <Navigation />
+      {/* outlet - this is where the child routes will be rendered */}
+      <main className="py-3">
+        <Outlet />
+      </main>
+    </>
   );
-};
-
-export default App;
+}

@@ -1,7 +1,6 @@
-module.exports = {
-  content: [
-    "./src/**/*.{html,js,jsx,ts,tsx}", // Add this line to include all your React files
-  ],
+// tailwind.config.js
+export default {
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {},
   },

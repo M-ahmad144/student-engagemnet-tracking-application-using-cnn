@@ -11,6 +11,8 @@ import { styled } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux"; // Import useDispatch hook
+import { setVideoData } from "../../redux/features/video/videoSlice";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   height: "100vh",
@@ -62,6 +64,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // Hook to dispatch actions
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0]; // Get the selected file
@@ -80,7 +83,11 @@ const Home = () => {
           }
         );
 
+        // Save response in Redux store
         const videoName = response.data.video_name;
+        const videoDetails = response.data; // Store other details if needed
+        dispatch(setVideoData({ videoName, videoDetails }));
+
         navigate(`/analysis-result?video_name=${videoName}`);
       } catch (error) {
         console.error("Error uploading video:", error);
