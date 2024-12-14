@@ -8,7 +8,7 @@ export default defineConfig({
   //backend route proxy
   server: {
     proxy: {
-      "/api": "http://localhost:3000",
+      "/api": "https://studentengagementtrackingusersapis1-w1mev157.b4a.run",
     },
   },
 });
