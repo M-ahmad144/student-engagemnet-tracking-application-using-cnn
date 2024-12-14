@@ -39,7 +39,8 @@ const theme = createTheme({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-      <Route path="" element={<HomePage />} />
+      {/* if user info then able to access the home and analysis */}
+      <Route path="/" element={<HomePage />} />
       <Route path="/analysis-result" element={<Analysis />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Ensure useEffect is imported
 import {
   Button,
   Box,
@@ -10,8 +10,8 @@ import {
 import { styled } from "@mui/system";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux"; // Import useDispatch hook
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { setVideoData } from "../../redux/features/video/videoSlice";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -63,8 +63,24 @@ const UploadButton = styled(Button)(({ theme }) => ({
 const Home = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // Hook to dispatch actions
+  const dispatch = useDispatch();
+  const userInfo = useSelector((state) => state.auth.userInfo);
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigate("/login"); // Navigate if user is already logged in
+    }
+  }, [userInfo, navigate]);
+
+  if (!userInfo) {
+    return (
+      <StyledContainer>
+        <CircularProgress />
+      </StyledContainer>
+    );
+  }
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0]; // Get the selected file
