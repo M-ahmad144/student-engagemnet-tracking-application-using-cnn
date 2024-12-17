@@ -34,7 +34,7 @@ const Profile = () => {
     } else {
       try {
         const updateData = {
-          _id: userInfo._id,
+          id: userInfo._id,
           username,
           email,
         };
