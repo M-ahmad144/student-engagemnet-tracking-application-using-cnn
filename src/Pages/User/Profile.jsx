@@ -5,7 +5,7 @@ import { useProfileMutation } from "../../redux/api/userApiSlice";
 import { setCredentials } from "../../redux/features/auth/authSlice";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useTheme } from "@mui/material/styles"; // Assuming you're using Material UI for theme
+import { useTheme } from "@mui/material/styles";
 
 const Profile = () => {
   const [username, setUserName] = useState("");
@@ -34,7 +34,7 @@ const Profile = () => {
     } else {
       try {
         const updateData = {
-          id: userInfo._id,
+          _id: userInfo._id,
           username,
           email,
         };
