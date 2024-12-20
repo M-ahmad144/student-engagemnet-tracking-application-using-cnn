@@ -23,18 +23,25 @@ const Profile = () => {
   useEffect(() => {
     setUserName(userInfo.data.username);
     setEmail(userInfo.data.email);
+    console.log(userInfo);
   }, [userInfo.data.username, userInfo.data.email]);
 
   const dispatch = useDispatch();
-
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    // Check if userInfo and userInfo.data.id are available
+    if (!userInfo || !userInfo.data || !userInfo.data.id) {
+      toast.error("User ID is missing");
+      return;
+    }
+
     if (password && password !== confirmPassword) {
       toast.error("Passwords do not match");
     } else {
       try {
         const updateData = {
-          _id: userInfo.data.id,
+          _id: userInfo.data.id, // Use userInfo.data.id
           username,
           email,
         };

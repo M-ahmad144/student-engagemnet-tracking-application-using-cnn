@@ -7,7 +7,7 @@ import {
   RouterProvider,
   createRoutesFromElements,
 } from "react-router-dom";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import App from "./App.jsx";
 import "./index.css";
 import store from "./redux/store";
@@ -22,6 +22,7 @@ import Profile from "./Pages/User/Profile.jsx";
 // Dashboard Pages
 import HomePage from "./Pages/Dashboard/HomePage.jsx";
 import Analysis from "./Pages/Dashboard/Analysis.jsx";
+import StudentManagement from "./components/studentManagement.jsx";
 
 // Create a theme
 const theme = createTheme({
@@ -32,6 +33,12 @@ const theme = createTheme({
     secondary: {
       main: "#f44336",
     },
+    background: {
+      default: "#f5f5f5", // Light gray background
+    },
+    text: {
+      primary: "#000000", // Black text
+    },
   },
 });
 
@@ -39,8 +46,8 @@ const theme = createTheme({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-      {/* if user info then able to access the home and analysis */}
       <Route path="/" element={<HomePage />} />
+      <Route path="/student-management" element={<StudentManagement />} />
       <Route path="/analysis-result" element={<Analysis />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -54,6 +61,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
+        <CssBaseline /> {/* Apply global theme styling */}
         <RouterProvider router={router} />
       </ThemeProvider>
     </Provider>

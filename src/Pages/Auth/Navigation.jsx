@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/userApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
 import {
-  AiOutlineHome,
-  AiOutlineLogin,
-  AiOutlineUserAdd,
-} from "react-icons/ai";
-import { FaChartBar } from "react-icons/fa"; // Import the analytics icon
+  FaHome, // Home icon
+  FaChartPie, // Analytics icon
+  FaUsersCog, // Student management icon
+  FaChartLine, // Engagement results icon
+} from "react-icons/fa"; // Updated icons from FontAwesome
+import { IoMdExit } from "react-icons/io"; // Icon for logout
+import { BsPersonCircle } from "react-icons/bs"; // Icon for user profile
 import "./Navigation.css";
 
 function Navigation() {
@@ -60,7 +62,7 @@ function Navigation() {
           to="/"
           className="flex items-center transform transition-transform hover:translate-x-2"
         >
-          <AiOutlineHome className="mt-[3rem] mr-2 text-sky-500" size={26} />
+          <FaHome className="mt-[3rem] mr-2 text-sky-500" size={26} />
           <span className="hidden nav-item-name mt-[3rem] text-black text-sm">
             Home
           </span>
@@ -71,9 +73,31 @@ function Navigation() {
           to="/analysis-result"
           className="flex items-center transform transition-transform hover:translate-x-2"
         >
-          <FaChartBar className="mt-[2rem] mr-2 text-sky-500" size={26} />
+          <FaChartPie className="mt-[2rem] mr-2 text-sky-500" size={26} />
           <span className="hidden nav-item-name mt-[2rem] text-black text-sm">
-            Analytics
+            Analytics Overview
+          </span>
+        </Link>
+
+        {/* Student Management Icon */}
+        <Link
+          to="/student-management"
+          className="flex items-center transform transition-transform hover:translate-x-2"
+        >
+          <FaUsersCog className="mt-[2rem] mr-2 text-sky-500" size={26} />
+          <span className="hidden nav-item-name mt-[2rem] text-black text-sm">
+            Student Management
+          </span>
+        </Link>
+
+        {/* Student Engagement Results Icon */}
+        <Link
+          to="/student-engagement-results"
+          className="flex items-center transform transition-transform hover:translate-x-2"
+        >
+          <FaChartLine className="mt-[2rem] mr-2 text-sky-500" size={26} />
+          <span className="hidden nav-item-name mt-[2rem] text-black text-sm">
+            Engagement Results
           </span>
         </Link>
       </div>
@@ -120,6 +144,7 @@ function Navigation() {
                 to="/profile"
                 className="block hover:bg-sky-600 px-4 py-2 text-black text-sm"
               >
+                <BsPersonCircle className="inline mr-2" size={18} />
                 Profile
               </Link>
             </li>
@@ -128,6 +153,7 @@ function Navigation() {
                 onClick={handleLogout}
                 className="block hover:bg-sky-600 px-4 py-2 rounded-b-md w-full text-black text-left text-sm"
               >
+                <IoMdExit className="inline mr-2" size={18} />
                 Logout
               </button>
             </li>

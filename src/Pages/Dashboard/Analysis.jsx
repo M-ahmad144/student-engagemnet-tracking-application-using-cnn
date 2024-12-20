@@ -7,47 +7,40 @@ import {
   Paper,
   CircularProgress,
   Grid,
-  Slider,
+  Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useSelector } from "react-redux";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
   PieChart,
   Pie,
   Cell,
   LineChart,
   Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
   ResponsiveContainer,
+  AreaChart,
+  Area,
   ScatterChart,
   Scatter,
-  ZAxis,
 } from "recharts";
-import { ResponsiveHeatMap } from "@nivo/heatmap";
-import { useMediaQuery } from "@mui/material";
+import { useSaveEngagementResultMutation } from "../../redux/api/studentSlice";
 
-// Styled components
+// Styled components for better UI
 const StyledContainer = styled(Container)(({ theme }) => ({
   minHeight: "100vh",
-  width: "100%",
-  maxWidth: "100% !important",
   display: "flex",
   flexDirection: "column",
   padding: theme.spacing(4),
-  backgroundColor: "#ffffff",
-  marginLeft: "60px",
   overflow: "hidden",
-  "&::-webkit-scrollbar": {
-    display: "none",
-  },
-  "-ms-overflow-style": "none",
-  "scrollbar-width": "none",
 }));
 
 const ChartPaper = styled(Paper)(({ theme }) => ({
@@ -60,19 +53,22 @@ const ChartPaper = styled(Paper)(({ theme }) => ({
 const Analysis = () => {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState([0, 100]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const videoName = useSelector((state) => state.video.videoName);
-
-  // Detect mobile screens
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const [saveEngagementResult, { isLoading: isSaving }] =
+    useSaveEngagementResultMutation();
 
   useEffect(() => {
     const fetchAnalysisResults = async () => {
+      if (!videoName) return; // Early exit if videoName is not available.
       try {
         const response = await axios.get(
           `http://localhost:5000/analysis-result?video_name=${videoName}`
         );
         setResults(response.data.engagement_results);
+        console.log(response.data.engagement_results);
       } catch (error) {
         console.error("Error fetching analysis results:", error);
         setResults(null);
@@ -90,18 +86,17 @@ const Analysis = () => {
         summaryData: [],
         timelineData: [],
         pieData: [],
-        heatmapData: [],
         scatterData: [],
+        areaData: [],
       };
 
     const engagementCounts = {
-      Engaged: results.filter((r) => r.engagement_status === "Engaged").length,
-      Distracted: results.filter((r) => r.engagement_status === "Distracted")
+      Engaged: results.filter((r) => r.engagement_status === "Engaged").length, //get count of engaged frames
+      Distracted: results.filter((r) => r.engagement_status === "Distracted") //get count of distracted frames
         .length,
-      Neutral: results.filter((r) => r.engagement_status === "Neutral").length,
     };
 
-    const total = Object.values(engagementCounts).reduce((a, b) => a + b, 0);
+    const total = Object.values(engagementCounts).reduce((a, b) => a + b, 0); //get total count of engaged and distracted
 
     const summaryData = Object.entries(engagementCounts).map(
       ([key, value]) => ({
@@ -113,13 +108,8 @@ const Analysis = () => {
 
     const timelineData = results.map((r, i) => ({
       frame: i + 1,
-      status: r.engagement_status,
-      engagementValue:
-        r.engagement_status === "Engaged"
-          ? 2
-          : r.engagement_status === "Neutral"
-          ? 1
-          : 0,
+      engaged: r.engagement_status === "Engaged" ? 1 : 0,
+      distracted: r.engagement_status === "Distracted" ? 1 : 0,
     }));
 
     const pieData = summaryData.map((item) => ({
@@ -127,35 +117,86 @@ const Analysis = () => {
       value: parseFloat(item.percentage),
     }));
 
-    const heatmapData = [
-      {
-        id: "Engagement Intensity",
-        data: timelineData.map((d) => ({
-          x: d.frame,
-          y: d.engagementValue,
-        })),
-      },
-    ];
-
-    const scatterData = timelineData.map((d) => ({
-      x: d.frame,
-      y: d.engagementValue,
-      z: 1,
+    const scatterData = results.map((r, i) => ({
+      frame: i + 1,
+      engagementLevel: r.engagement_status === "Engaged" ? 1 : 0,
+      distractionLevel: r.engagement_status === "Distracted" ? 1 : 0,
     }));
 
-    return { summaryData, timelineData, pieData, heatmapData, scatterData };
+    const areaData = results.map((r, i) => ({
+      frame: i + 1,
+      engaged: r.engagement_status === "Engaged" ? 1 : 0,
+      distracted: r.engagement_status === "Distracted" ? 1 : 0,
+    }));
+
+    return { summaryData, timelineData, pieData, scatterData, areaData };
+  };
+  const handleSaveResult = async () => {
+    if (!results || results.length === 0) {
+      setSnackbarMessage("No results available to save.");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // Calculate the engagement percentage (based on "Engaged" status)
+    const engagementCounts = {
+      Engaged: results.filter((r) => r.engagement_status === "Engaged").length,
+      Distracted: results.filter((r) => r.engagement_status === "Distracted")
+        .length,
+    };
+
+    const total = Object.values(engagementCounts).reduce((a, b) => a + b, 0);
+    const engagementPercentage = (engagementCounts.Engaged / total) * 100;
+
+    // Set engagement category based on the engagement percentage
+    let engagementCategory = "";
+    if (engagementPercentage <= 20) {
+      engagementCategory = "Very Low Engagement";
+    } else if (engagementPercentage <= 40) {
+      engagementCategory = "Low Engagement";
+    } else if (engagementPercentage <= 60) {
+      engagementCategory = "Moderate Engagement";
+    } else if (engagementPercentage <= 80) {
+      engagementCategory = "High Engagement";
+    } else {
+      engagementCategory = "Very High Engagement";
+    }
+
+    // Set final engagement status based on percentage
+    const finalEngagementStatus =
+      engagementPercentage > 50 ? "Engaged" : "Distracted";
+
+    // Extract roll number from videoName (e.g., "144.mp4" => "144")
+    const rollNo = videoName.split(".")[0];
+
+    console.log(
+      `Saving engagement result for video: ${videoName} with status: ${finalEngagementStatus}, category: ${engagementCategory}, and engagement percentage: ${engagementPercentage}`
+    );
+
+    try {
+      // Send the data to the backend with all required fields
+      await saveEngagementResult({
+        rollNo,
+        finalEngagementStatus,
+        engagementCategory,
+        engagementPercentage: parseFloat(engagementPercentage.toFixed(2)),
+      }).unwrap();
+
+      // Success Snackbar
+      setSnackbarMessage(`Engagement result for ${rollNo} saved successfully!`);
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Error saving engagement result:", error);
+      setSnackbarMessage("Failed to save engagement result.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
   };
 
-  const { summaryData, timelineData, pieData, heatmapData, scatterData } =
+  const { summaryData, timelineData, pieData, scatterData, areaData } =
     prepareChartData();
-
-  const COLORS = ["#4caf50", "#f44336", "#ffc107"];
-
-  const handleTimeRangeChange = (event, newValue) => {
-    setTimeRange(newValue);
-  };
-
-  const filteredTimelineData = timelineData.slice(timeRange[0], timeRange[1]);
 
   if (loading) {
     return (
@@ -174,74 +215,46 @@ const Analysis = () => {
 
   return (
     <StyledContainer>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{ fontSize: { xs: "1.5rem", sm: "2rem" }, mb: 4 }}
-        align="center"
-      >
-        Advanced Engagement Analysis for{" "}
-        <span style={{ color: "#1976d2" }}>{videoName}</span>
-      </Typography>
+      <Box mb={4} display="flex" justifyContent="space-between">
+        <Typography variant="h4">
+          Engagement Analysis for {videoName}
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSaveResult}
+          disabled={!results || isSaving}
+        >
+          {isSaving
+            ? "Saving..."
+            : results
+            ? "Save Engagement Result"
+            : "No Data to Save"}
+        </Button>
+      </Box>
 
       {results ? (
         <Grid container spacing={4}>
-          {/* Engagement Overview */}
+          {/* Row 1: Engagement Distribution and Engagement Over Time */}
           <Grid item xs={12} md={6}>
             <ChartPaper>
-              <Typography variant="h5" gutterBottom>
-                <strong>Engagement Overview:</strong> Summary of Student
-                Engagement
+              <Typography variant="h6" gutterBottom>
+                Engagement Distribution
               </Typography>
-              <ResponsiveContainer width="100%" height={isMobile ? 200 : 300}>
-                <BarChart data={summaryData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="status" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="count"
-                    fill="#8884d8"
-                    name="Count"
-                  />
-                  <Bar
-                    yAxisId="right"
-                    dataKey="percentage"
-                    fill="#82ca9d"
-                    name="Percentage"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartPaper>
-          </Grid>
-
-          {/* Engagement Distribution */}
-          <Grid item xs={12} md={6}>
-            <ChartPaper>
-              <Typography variant="h5" gutterBottom>
-                Engagement Distribution by Status
-              </Typography>
-              <ResponsiveContainer width="100%" height={isMobile ? 200 : 300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={pieData}
+                    dataKey="value"
+                    nameKey="name"
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
+                    outerRadius={120}
                   >
                     {pieData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
+                        fill={index === 0 ? "#4caf50" : "#f44336"} // Green and Red
                       />
                     ))}
                   </Pie>
@@ -252,137 +265,132 @@ const Analysis = () => {
             </ChartPaper>
           </Grid>
 
-          {/* Engagement Timeline */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
             <ChartPaper>
-              <Typography variant="h5" gutterBottom>
-                Engagement Timeline: Tracking Attention Over Time
+              <Typography variant="h6" gutterBottom>
+                Engagement Over Time
               </Typography>
-              <Slider
-                value={timeRange}
-                onChange={handleTimeRangeChange}
-                valueLabelDisplay="auto"
-                aria-labelledby="range-slider"
-                max={timelineData.length}
-                sx={{ width: "100%", maxWidth: "600px", margin: "auto" }}
-              />
-              <ResponsiveContainer width="100%" height={isMobile ? 200 : 300}>
-                <LineChart data={filteredTimelineData}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={timelineData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="frame" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
                   <Line
-                    type="stepAfter"
-                    dataKey="engagementValue"
-                    stroke="#8884d8"
+                    type="monotone"
+                    dataKey="engaged"
+                    stroke="#82ca9d"
+                    activeDot={{ r: 8 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="distracted"
+                    stroke="#f44336"
+                    activeDot={{ r: 8 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </ChartPaper>
           </Grid>
 
-          {/* Engagement Heatmap */}
-          <Grid item xs={12}>
+          {/* Row 2: Engagement by Frame (Stacked) and Engagement Heatmap */}
+          <Grid item xs={12} md={6}>
             <ChartPaper>
-              <Typography variant="h5" gutterBottom>
-                Engagement Heatmap: Visualizing Engagement Intensity by Frame
+              <Typography variant="h6" gutterBottom>
+                Engagement by Frame (Stacked)
               </Typography>
-              <div style={{ height: isMobile ? "300px" : "400px" }}>
-                <ResponsiveHeatMap
-                  data={heatmapData}
-                  margin={{ top: 60, right: 90, bottom: 60, left: 90 }}
-                  xOuterPadding={0.1}
-                  yOuterPadding={0.1}
-                  axisTop={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: -90,
-                    legend: "",
-                    legendPosition: "middle",
-                    legendOffset: -46,
-                  }}
-                  axisRight={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Engagement Level",
-                    legendPosition: "middle",
-                    legendOffset: 70,
-                  }}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Engagement Level",
-                    legendPosition: "middle",
-                    legendOffset: -72,
-                  }}
-                  colors={{
-                    type: "sequential",
-                    scheme: "blues",
-                  }}
-                  emptyColor="#555555"
-                  legends={[
-                    {
-                      anchor: "bottom",
-                      translateX: 0,
-                      translateY: 30,
-                      length: 400,
-                      thickness: 8,
-                      direction: "row",
-                      tickPosition: "after",
-                      tickSize: 3,
-                      tickSpacing: 4,
-                      tickOverlap: false,
-                      tickFormat: ">-.2s",
-                      title: "Engagement Intensity →",
-                      titleAlign: "start",
-                      titleOffset: 4,
-                    },
-                  ]}
-                />
-              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={timelineData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="frame" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="engaged" stackId="a" fill="#4caf50" />
+                  <Bar dataKey="distracted" stackId="a" fill="#f44336" />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartPaper>
           </Grid>
 
-          {/* Engagement Scatter Plot */}
+          <Grid item xs={12} md={6}>
+            <ChartPaper>
+              <Typography variant="h6" gutterBottom>
+                Engagement Heatmap
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <ScatterChart>
+                  <CartesianGrid />
+                  <XAxis dataKey="frame" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Scatter data={scatterData} fill="#8884d8" />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </ChartPaper>
+          </Grid>
+
+          {/* Row 3: Engagement Trend Analysis */}
           <Grid item xs={12}>
             <ChartPaper>
-              <Typography variant="h5" gutterBottom>
-                Engagement Scatter Plot: Individual Data Point Analysis
+              <Typography variant="h6" gutterBottom>
+                Engagement Trend Analysis
               </Typography>
-              <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
-                <ScatterChart
-                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                >
-                  <CartesianGrid />
-                  <XAxis type="number" dataKey="x" name="Frame" />
-                  <YAxis type="number" dataKey="y" name="Engagement Level" />
-                  <ZAxis
-                    type="number"
-                    dataKey="z"
-                    range={[0, 500]}
-                    name="Value"
-                  />
-                  <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={areaData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="frame" />
+                  <YAxis />
+                  <Tooltip />
                   <Legend />
-                  <Scatter
-                    name="Engagement"
-                    data={scatterData}
-                    fill="#8884d8"
+                  <Area
+                    type="monotone"
+                    dataKey="engaged"
+                    stackId="1"
+                    stroke="#4caf50"
+                    fill="#4caf50"
                   />
-                </ScatterChart>
+                  <Area
+                    type="monotone"
+                    dataKey="distracted"
+                    stackId="1"
+                    stroke="#f44336"
+                    fill="#f44336"
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </ChartPaper>
           </Grid>
         </Grid>
       ) : (
-        <Typography sx={{ textAlign: "center", color: "#666666" }}>
-          No engagement data available for analysis.
-        </Typography>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="70vh"
+        >
+          <Typography variant="h6" color="textSecondary">
+            No student data to display
+          </Typography>
+        </Box>
       )}
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </StyledContainer>
   );
 };
