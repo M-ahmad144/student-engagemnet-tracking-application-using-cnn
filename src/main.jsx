@@ -23,6 +23,7 @@ import Profile from "./Pages/User/Profile.jsx";
 import HomePage from "./Pages/Dashboard/HomePage.jsx";
 import Analysis from "./Pages/Dashboard/Analysis.jsx";
 import StudentManagement from "./components/studentManagement.jsx";
+import StudentEngagementResults from "./components/studentEngagementResult.jsx";
 
 // Create a theme
 const theme = createTheme({
@@ -52,6 +53,10 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
+      <Route
+        path="/student-engagement-results"
+        element={<StudentEngagementResults />}
+      />
     </Route>
   )
 );

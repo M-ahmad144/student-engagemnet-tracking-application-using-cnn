@@ -52,12 +52,39 @@ export const studentApiSlice = apiSlice.injectEndpoints({
           engagementPercentage,
         };
 
-        console.log("Payload being sent to backend:", payload); // Debugging log
-
         return {
           url: `${STUDENT_URL}/engagement`,
           method: "POST",
           body: payload,
+        };
+      },
+    }),
+
+    // Display engagement result with filters
+    // Display engagement result with filters
+    displayEngagementResult: builder.query({
+      query: (filters) => {
+        // Extract filters
+        const { department, section, session, teacher } = filters;
+
+        // Create an array to hold query parameters
+        const queryParams = [];
+
+        // Add query parameters only if they exist
+        if (department)
+          queryParams.push(`department=${encodeURIComponent(department)}`);
+        if (section) queryParams.push(`section=${encodeURIComponent(section)}`);
+        if (session) queryParams.push(`session=${encodeURIComponent(session)}`);
+        if (teacher) queryParams.push(`teacher=${encodeURIComponent(teacher)}`);
+
+        // Join the parameters with '&'
+        const queryString =
+          queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
+        // Return the request configuration
+        return {
+          url: `${STUDENT_URL}/engagement-results${queryString}`,
+          method: "GET",
         };
       },
     }),
@@ -71,4 +98,5 @@ export const {
   useUpdateStudentMutation,
   useDeleteStudentMutation,
   useSaveEngagementResultMutation,
+  useDisplayEngagementResultQuery,
 } = studentApiSlice;

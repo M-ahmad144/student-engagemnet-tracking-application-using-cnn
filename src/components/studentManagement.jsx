@@ -38,6 +38,7 @@ const StudentManagement = () => {
   const [section, setSection] = useState("");
   const [session, setSession] = useState("");
   const [teacher, setTeacher] = useState("");
+  const [department, setDepartment] = useState("");
   const [studentId, setStudentId] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -52,7 +53,15 @@ const StudentManagement = () => {
   }, [addStudent, updateStudent, deleteStudent, students.length]); // Re-run the effect when students data changes
 
   const handleAddOrUpdateStudent = async () => {
-    if (!name || !rollNo || !subject || !section || !session || !teacher) {
+    if (
+      !name ||
+      !rollNo ||
+      !subject ||
+      !section ||
+      !session ||
+      !teacher ||
+      !department
+    ) {
       setSnackbar({
         open: true,
         message: "All fields are required",
@@ -61,7 +70,15 @@ const StudentManagement = () => {
       return;
     }
 
-    const studentData = { name, rollNo, subject, section, session, teacher };
+    const studentData = {
+      name,
+      rollNo,
+      subject,
+      section,
+      session,
+      teacher,
+      department,
+    };
 
     try {
       if (studentId) {
@@ -118,6 +135,7 @@ const StudentManagement = () => {
     setSection("");
     setSession("");
     setTeacher("");
+    setDepartment("");
     setStudentId(null);
   };
 
@@ -129,6 +147,7 @@ const StudentManagement = () => {
     setSection(student.section);
     setSession(student.session);
     setTeacher(student.teacher);
+    setDepartment(student.department);
     setIsDialogOpen(true);
   };
 
@@ -211,6 +230,9 @@ const StudentManagement = () => {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Teacher: {student.teacher}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    department: {student.department}
                   </Typography>
                 </CardContent>
                 <CardActions
@@ -299,6 +321,13 @@ const StudentManagement = () => {
             label="Teacher"
             value={teacher}
             onChange={(e) => setTeacher(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Department"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
             fullWidth
             margin="normal"
           />
