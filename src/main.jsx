@@ -25,6 +25,9 @@ import Analysis from "./Pages/Dashboard/Analysis.jsx";
 import StudentManagement from "./components/studentManagement.jsx";
 import StudentEngagementResults from "./components/studentEngagementResult.jsx";
 
+// PrivateRoute Component
+import PrivateRoute from "./components/Privateroutes.jsx";
+
 // Create a theme
 const theme = createTheme({
   palette: {
@@ -46,18 +49,26 @@ const theme = createTheme({
 // Create the router
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/student-management" element={<StudentManagement />} />
-      <Route path="/analysis-result" element={<Analysis />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route
-        path="/student-engagement-results"
-        element={<StudentEngagementResults />}
-      />
-    </Route>
+    <>
+      {/* Root App Route */}
+      <Route path="/" element={<App />}>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Routes wrapped in PrivateRoute */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/student-management" element={<StudentManagement />} />
+          <Route path="/analysis-result" element={<Analysis />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/student-engagement-results"
+            element={<StudentEngagementResults />}
+          />
+        </Route>
+      </Route>
+    </>
   )
 );
 
