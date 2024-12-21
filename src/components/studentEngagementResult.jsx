@@ -22,6 +22,13 @@ import PeopleIcon from "@mui/icons-material/People";
 import SubjectIcon from "@mui/icons-material/Subject";
 import SchoolIcon from "@mui/icons-material/School";
 import GroupIcon from "@mui/icons-material/Group";
+import PersonIcon from "@mui/icons-material/Person"; // Name
+import NumbersIcon from "@mui/icons-material/Numbers"; // Roll Number
+import BookIcon from "@mui/icons-material/Book"; // Subject
+import ClassIcon from "@mui/icons-material/Class"; // Section
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday"; // Session
+import ApartmentIcon from "@mui/icons-material/Apartment"; // Department
+import AssessmentIcon from "@mui/icons-material/Assessment"; // Results
 import {
   useGetStudentsQuery,
   useDisplayEngagementResultQuery,
@@ -246,27 +253,42 @@ const StudentEngagementResults = () => {
           <Table size="medium">
             <TableHead>
               <TableRow>
+                {/* Name Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                  <PeopleIcon sx={{ fontSize: 20, marginRight: 1 }} /> Name
+                  <PersonIcon sx={{ fontSize: 20, marginRight: 1 }} /> Name
                 </TableCell>
+
+                {/* Roll Number Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                  <GroupIcon sx={{ fontSize: 20, marginRight: 1 }} /> Roll
+                  <NumbersIcon sx={{ fontSize: 20, marginRight: 1 }} /> Roll
                   Number
                 </TableCell>
+
+                {/* Subject Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                  <SubjectIcon sx={{ fontSize: 20, marginRight: 1 }} /> Subject
+                  <BookIcon sx={{ fontSize: 20, marginRight: 1 }} /> Subject
                 </TableCell>
+
+                {/* Section Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                  <SchoolIcon sx={{ fontSize: 20, marginRight: 1 }} /> Section
+                  <ClassIcon sx={{ fontSize: 20, marginRight: 1 }} /> Section
                 </TableCell>
+
+                {/* Session Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                  <SchoolIcon sx={{ fontSize: 20, marginRight: 1 }} /> Session
+                  <CalendarTodayIcon sx={{ fontSize: 20, marginRight: 1 }} />{" "}
+                  Session
                 </TableCell>
+
+                {/* Department Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
+                  <ApartmentIcon sx={{ fontSize: 20, marginRight: 1 }} />{" "}
                   Department
                 </TableCell>
+
+                {/* Engagement Results Column */}
                 <TableCell sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                  <BarChartIcon sx={{ fontSize: 20, marginRight: 1 }} />{" "}
+                  <AssessmentIcon sx={{ fontSize: 20, marginRight: 1 }} />{" "}
                   Engagement Results
                 </TableCell>
               </TableRow>
