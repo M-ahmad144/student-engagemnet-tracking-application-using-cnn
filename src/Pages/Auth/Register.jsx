@@ -31,6 +31,7 @@ function Register() {
     }
   }, [navigate, redirect, userInfo]);
 
+  // Submit handler
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!username || !email || !password || !confirmPassword) {
@@ -43,8 +44,8 @@ function Register() {
     }
     try {
       const user = await register({ username, email, password }).unwrap();
-      dispatch(setCredentials(user));
-      navigate("/login");
+      dispatch(setCredentials(user)); // Save user credentials to Redux store
+      navigate("/login"); // Redirect after successful registration
       toast.success("User registered successfully");
     } catch (error) {
       console.log(error);
