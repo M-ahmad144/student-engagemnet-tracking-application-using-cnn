@@ -45,7 +45,7 @@ function Register() {
     try {
       const user = await register({ username, email, password }).unwrap();
       dispatch(setCredentials(user)); // Save user credentials to Redux store
-      navigate(redirect); // Redirect after successful registration
+      navigate("/login"); // Redirect after successful registration
       toast.success("User registered successfully");
     } catch (error) {
       console.log(error);
