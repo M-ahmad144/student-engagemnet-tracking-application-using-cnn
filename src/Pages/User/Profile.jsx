@@ -1,71 +1,58 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { useProfileMutation } from "../../redux/api/userApiSlice";
+import { useProfileMutation } from "../../redux/api/userApiSlice"; // Assuming this hooks into the backend controller
 import { setCredentials } from "../../redux/features/auth/authSlice";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 
 const Profile = () => {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { userInfo } = useSelector((state) => state.auth);
+  const { userInfo } = useSelector((state) => state.auth); // Assume userInfo holds the current user info
 
   const [updateProfile, { isLoading: loadingUpdateProfile }] =
-    useProfileMutation();
+    useProfileMutation(); // Assume this mutation calls your backend to update the profile
   const theme = useTheme();
 
   useEffect(() => {
-    setUserName(userInfo.data.username);
-    setEmail(userInfo.data.email);
     console.log(userInfo);
-  }, [userInfo.data.username, userInfo.data.email]);
+    if (userInfo?.data) {
+      setUserName(userInfo.data.username);
+      setEmail(userInfo.data.email);
+    }
+  }, [userInfo]);
 
   const dispatch = useDispatch();
+
   const submitHandler = async (e) => {
     e.preventDefault();
 
     // Check if userInfo and userInfo.data.id are available
-    if (!userInfo || !userInfo.data || !userInfo.data.id) {
-      toast.error("User ID is missing");
+    if (!userInfo.data.email) {
+      toast.error("User not found");
       return;
     }
 
-    if (password && password !== confirmPassword) {
-      toast.error("Passwords do not match");
-    } else {
-      try {
-        const updateData = {
-          _id: userInfo.data.id, // Use userInfo.data.id
-          username,
-          email,
-        };
+    if (!username || !email) {
+      toast.error("Username and Email are required");
+      return;
+    }
 
-        if (password) {
-          if (!currentPassword) {
-            toast.error("Current password is required to update password");
-            return;
-          }
-          updateData.currentPassword = currentPassword;
-          updateData.password = password;
-        }
+    try {
+      const updateData = {
+        username,
+        email,
+      };
 
-        const res = await updateProfile(updateData).unwrap();
-        dispatch(setCredentials({ ...res }));
-        toast.success("Profile updated successfully");
-        setCurrentPassword("");
-        setPassword("");
-        setConfirmPassword("");
-      } catch (err) {
-        toast.error(
-          err?.data?.message || err.error || "Failed to update profile"
-        );
-      }
+      const res = await updateProfile(updateData).unwrap();
+      dispatch(setCredentials({ ...res })); // Update the Redux state
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      toast.error(
+        err?.data?.message || err.error || "Failed to update profile"
+      );
     }
   };
 
@@ -92,6 +79,7 @@ const Profile = () => {
               value={username}
               onChange={(e) => setUserName(e.target.value)}
               aria-label="Username"
+              required
             />
           </div>
 
@@ -106,48 +94,7 @@ const Profile = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-label="Email"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium text-gray-300 text-sm">
-              Current Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter current password"
-              className="border-gray-600 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 w-full text-black transition duration-200 focus:outline-none"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              aria-label="Current Password"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium text-gray-300 text-sm">
-              New Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter new password"
-              className="border-gray-600 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 w-full text-black transition duration-200 focus:outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-label="New Password"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 font-medium text-gray-300 text-sm">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              placeholder="Confirm new password"
-              className="border-gray-600 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 w-full text-black transition duration-200 focus:outline-none"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              aria-label="Confirm New Password"
+              required
             />
           </div>
 

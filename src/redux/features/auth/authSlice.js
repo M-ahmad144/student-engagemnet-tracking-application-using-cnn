@@ -1,9 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// Helper function to check if token has expired
+const isTokenExpired = () => {
+  const expirationTime = localStorage.getItem("expirationTime");
+  if (!expirationTime) return true;
+  return new Date().getTime() > expirationTime;
+};
+
+// Check if there is valid user info (not expired)
 const initialState = {
-  userInfo: localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : null,
+  userInfo:
+    localStorage.getItem("userInfo") && !isTokenExpired()
+      ? JSON.parse(localStorage.getItem("userInfo"))
+      : null,
 };
 
 const authSlice = createSlice({
@@ -19,7 +28,7 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.userInfo = null;
-      localStorage.clear();
+      localStorage.clear(); // Clears both userInfo and expirationTime
     },
   },
 });
