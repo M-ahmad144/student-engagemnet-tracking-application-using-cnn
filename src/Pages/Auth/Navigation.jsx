@@ -4,16 +4,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/userApiSlice";
 import { logout } from "../../redux/features/auth/authSlice";
 import {
-  FaHome, // Home icon
-  FaChartPie, // Analytics icon
-  FaUsersCog, // Student management icon
+  FaHome,
+  FaChartArea,
+  FaUsersCog,
   FaChartLine,
+  FaChartPie,
 } from "react-icons/fa";
 import { IoMdExit } from "react-icons/io";
 import { BsPersonCircle } from "react-icons/bs";
+import { AiOutlineLogin, AiOutlineUserAdd } from "react-icons/ai";
+
 import "./Navigation.css";
-//import AiOutlineLogin
-import { AiOutlineLogin } from "react-icons/ai";
+
 function Navigation() {
   const currentUser = useSelector((state) => state.auth.userInfo);
   const navigate = useNavigate();
@@ -74,7 +76,7 @@ function Navigation() {
           to="/analysis-result"
           className="flex items-center transform transition-transform hover:translate-x-2"
         >
-          <FaChartPie className="mt-[2rem] mr-2 text-sky-500" size={26} />
+          <FaChartArea className="mt-[2rem] mr-2 text-sky-500" size={26} />
           <span className="hidden nav-item-name mt-[2rem] text-black text-sm">
             Analytics Overview
           </span>
@@ -108,6 +110,7 @@ function Navigation() {
         <button
           onClick={toggleDropdown}
           className="flex items-center text-black hover:text-sky-500 focus:outline-none"
+          aria-label="User Profile"
         >
           {currentUser && (
             <span className="mr-2 font-medium text-sky-500">
@@ -123,6 +126,7 @@ function Navigation() {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
