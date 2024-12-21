@@ -170,10 +170,6 @@ const Analysis = () => {
     // Extract roll number from videoName (e.g., "144.mp4" => "144")
     const rollNo = videoName.split(".")[0];
 
-    console.log(
-      `Saving engagement result for video: ${videoName} with status: ${finalEngagementStatus}, category: ${engagementCategory}, and engagement percentage: ${engagementPercentage}`
-    );
-
     try {
       // Send the data to the backend with all required fields
       await saveEngagementResult({
@@ -198,6 +194,20 @@ const Analysis = () => {
   const { summaryData, timelineData, pieData, scatterData, areaData } =
     prepareChartData();
 
+  if (!results) {
+    return (
+      <StyledContainer>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="100vh"
+        >
+          <Typography variant="h4">No Engagement Results Available</Typography>
+        </Box>
+      </StyledContainer>
+    );
+  }
   if (loading) {
     return (
       <StyledContainer>

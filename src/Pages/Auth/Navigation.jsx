@@ -7,12 +7,13 @@ import {
   FaHome, // Home icon
   FaChartPie, // Analytics icon
   FaUsersCog, // Student management icon
-  FaChartLine, // Engagement results icon
-} from "react-icons/fa"; // Updated icons from FontAwesome
-import { IoMdExit } from "react-icons/io"; // Icon for logout
-import { BsPersonCircle } from "react-icons/bs"; // Icon for user profile
+  FaChartLine,
+} from "react-icons/fa";
+import { IoMdExit } from "react-icons/io";
+import { BsPersonCircle } from "react-icons/bs";
 import "./Navigation.css";
-
+//import AiOutlineLogin
+import { AiOutlineLogin } from "react-icons/ai";
 function Navigation() {
   const currentUser = useSelector((state) => state.auth.userInfo);
   const navigate = useNavigate();
